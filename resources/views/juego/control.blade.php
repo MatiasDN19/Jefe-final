@@ -127,6 +127,85 @@
     .hielo.visible { display: flex; }
     .hielo .msg { font-family: var(--pixel); font-size: 12px; line-height: 1.8; color: #fff; text-shadow: 2px 2px 0 var(--vacio); }
     .hielo .cuenta { font-family: var(--pixel); font-size: 64px; color: #fff; text-shadow: 5px 5px 0 var(--violeta); }
+
+    /* =========== PANTALLA DE VICTORIA =========== */
+    .victoria {
+        position: fixed; inset: 0; z-index: 300; display: none; overflow-y: auto;
+        flex-direction: column; align-items: center; gap: 14px; padding: 26px 16px 30px; text-align: center;
+        background: radial-gradient(ellipse at 50% 20%, rgba(214,64,159,.35), rgba(5,5,12,.97) 65%);
+    }
+    .victoria.visible { display: flex; animation: flashVictoria .6s steps(4); }
+    @keyframes flashVictoria { 0% { background: #fff; } 100% { } }
+    #confeti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; image-rendering: pixelated; }
+
+    /* Título 3D: cada letra es un <span> con sombras apiladas (la "extrusión")
+       y toda la palabra se balancea en perspectiva */
+    .titulo-3d { perspective: 500px; margin-top: 6px; position: relative; }
+    .titulo-3d .linea {
+        display: block; font-family: var(--pixel); line-height: 1.25; color: #fff; white-space: nowrap;
+        transform-style: preserve-3d; animation: balanceo 3.2s ease-in-out infinite;
+    }
+    .titulo-3d .chica { font-size: clamp(16px, 5vw, 26px); color: var(--cian); }
+    .titulo-3d .grande { font-size: clamp(24px, 8.5vw, 46px); }
+    .titulo-3d .letra {
+        display: inline-block; opacity: 0;
+        text-shadow:
+            1px 1px 0 #c01d52, 2px 2px 0 #c01d52, 3px 3px 0 #a3174a, 4px 4px 0 #a3174a,
+            5px 5px 0 #7a1240, 6px 6px 0 #7a1240, 7px 7px 0 #4c0d33, 8px 8px 0 #4c0d33,
+            10px 12px 14px rgba(0,0,0,.6), 0 0 26px rgba(255,197,61,.45);
+    }
+    .victoria.visible .letra {
+        animation: caeLetra .55s steps(6) forwards, ola 1.6s ease-in-out infinite;
+        animation-delay: calc(var(--i) * 70ms), calc(.6s + var(--i) * 90ms);
+    }
+    @keyframes caeLetra {
+        0% { opacity: 0; transform: translateY(-120px) scale(2.4) rotate(-20deg); }
+        70% { opacity: 1; transform: translateY(6px) scale(.9); }
+        100% { opacity: 1; transform: none; }
+    }
+    @keyframes ola { 0%, 100% { translate: 0 0; } 50% { translate: 0 -6px; } }
+    @keyframes balanceo {
+        0%, 100% { transform: rotateX(18deg) rotateY(-14deg); }
+        50% { transform: rotateX(10deg) rotateY(14deg); }
+    }
+
+    .resultado { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 10px; }
+    .dato { opacity: 0; padding: 10px 12px; display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+    .dato.ver { opacity: 1; animation: entraDato .35s steps(4); }
+    @keyframes entraDato { 0% { transform: translateX(-30px); opacity: 0; } 100% { transform: none; opacity: 1; } }
+    .dato .etiqueta { font-family: var(--terminal); font-size: 20px; color: var(--luz); }
+    .dato .valor { font-family: var(--pixel); font-size: 18px; color: #fff; }
+
+    .puesto { opacity: 0; font-family: var(--pixel); line-height: 1.4; padding: 14px 10px; }
+    .puesto .num { display: block; font-size: 56px; }
+    .puesto small { display: block; font-family: var(--terminal); font-size: 20px; color: var(--luz); }
+    .puesto.ver { opacity: 1; animation: golpePuesto .5s steps(5); }
+    @keyframes golpePuesto {
+        0% { transform: scale(4); opacity: 0; filter: brightness(3); }
+        60% { transform: scale(.9); opacity: 1; }
+        100% { transform: scale(1); filter: none; }
+    }
+    .puesto.p1 .num { color: #ffc53d; text-shadow: 4px 4px 0 #a86b00, 0 0 24px rgba(255,197,61,.8); }
+    .puesto.p2 .num { color: #d8dde6; text-shadow: 4px 4px 0 #6b7280; }
+    .puesto.p3 .num { color: #e09a5b; text-shadow: 4px 4px 0 #7a4417; }
+    .puesto.otro .num { color: var(--cian); text-shadow: 4px 4px 0 var(--violeta); }
+    .golpe-final { display: none; font-family: var(--pixel); font-size: 10px; color: var(--vacio); background: #ffc53d; padding: 6px 8px; margin-top: 8px; }
+    .golpe-final.ver { display: inline-block; animation: parpadeoTexto .5s steps(2) 4; }
+
+    .tabla-final { list-style: none; margin: 0; padding: 10px 12px; text-align: left; }
+    .tabla-final:empty { display: none; }
+    .tabla-final li { opacity: 0; display: flex; gap: 8px; align-items: center; padding: 4px 0; font-size: 20px; }
+    .tabla-final li.ver { opacity: 1; animation: entraDato .3s steps(3); }
+    .tabla-final li.yo { color: var(--cian); }
+    .tabla-final .pos { font-family: var(--pixel); font-size: 10px; width: 26px; }
+    .tabla-final .punto { width: 10px; height: 10px; flex: none; }
+    .tabla-final .nom { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .acciones-final { opacity: 0; width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 10px; }
+    .acciones-final.ver { opacity: 1; animation: entraDato .4s steps(4); }
+    .acciones-final .btn-pixel { width: 100%; padding: 14px; font-size: 12px; text-decoration: none; text-align: center; }
+    .esperando { display: none; font-size: 20px; color: var(--cian); animation: parpadeoTexto 1s steps(2) infinite; }
+    .esperando.ver { display: block; }
 @endsection
 
 @section('contenido')
@@ -186,6 +265,23 @@
             <button class="btn-pixel btn-habilidad" id="btn-especial">ESPECIAL<small>W</small></button>
         </div>
         <div class="ayuda">A/D moverse · ESPACIO atacar · S escudo · W especial</div>
+    </div>
+
+    {{-- Pantalla de victoria (aparece cuando llega JefeDerrotado) --}}
+    <div class="victoria" id="victoria">
+        <canvas id="confeti"></canvas>
+        <div class="titulo-3d" id="titulo-3d"></div>
+        <div class="resultado">
+            <div class="dato marco" id="v-danio"><span class="etiqueta">TU DAÑO</span><span class="valor">0</span></div>
+            <div class="dato marco" id="v-aporte"><span class="etiqueta">APORTE AL EQUIPO</span><span class="valor">0%</span></div>
+            <div class="puesto marco" id="v-puesto"><span class="num">#?</span><small></small><span class="golpe-final" id="v-golpe-final">★ GOLPE FINAL ★</span></div>
+            <ol class="tabla-final marco" id="v-tabla"></ol>
+        </div>
+        <div class="acciones-final" id="v-acciones">
+            <button class="btn-pixel" id="v-esperar" style="background: var(--cian); color: var(--vacio)">ESPERAR OTRA PARTIDA</button>
+            <div class="esperando" id="v-esperando">> esperando que el host reinicie al jefe...</div>
+            <a class="btn-pixel" href="{{ route('portada', ['menu' => 1]) }}" style="background: var(--contorno); color: var(--texto)">VOLVER AL MENÚ</a>
+        </div>
     </div>
 @endsection
 
@@ -543,6 +639,155 @@ document.addEventListener('DOMContentLoaded', () => {
     // Tus compañeros, que ya estaban jugando cuando entraste
     window.Campo?.fantasmas.cargar(@json($otros));
 
+
+    // =================================================================
+    // PANTALLA DE VICTORIA: título 3D, confeti y recuento de puntos
+    // =================================================================
+    const esperar = (ms) => new Promise(r => setTimeout(r, ms));
+
+    // Arma el título letra por letra: cada <span> tiene su --i para
+    // escalonar la animación (caen una atrás de la otra y después "olean")
+    function armarTitulo() {
+        const caja = $('titulo-3d');
+        caja.innerHTML = '';
+        let i = 0;
+        [['PROCESO', 'chica'], ['ELIMINADO', 'grande']].forEach(([texto, tam]) => {
+            const linea = document.createElement('span');
+            linea.className = 'linea ' + tam;
+            [...texto].forEach(ch => {
+                const l = document.createElement('span');
+                l.className = 'letra';
+                l.textContent = ch;
+                l.style.setProperty('--i', i++);
+                linea.appendChild(l);
+            });
+            caja.appendChild(linea);
+        });
+    }
+
+    // Cuenta de 0 hasta "hasta", frenando al final (easeOut), con un "tic" por paso
+    async function contar(el, hasta, ms = 1400, sufijo = '') {
+        const inicio = performance.now();
+        let ultimoTic = 0;
+        await new Promise(fin => {
+            function paso(t) {
+                const p = Math.min(1, (t - inicio) / ms);
+                const suave = 1 - Math.pow(1 - p, 3);
+                el.textContent = Math.round(hasta * suave) + sufijo;
+                if (t - ultimoTic > 60 && p < 1) { window.Sonido?.sonido('tick'); ultimoTic = t; }
+                p < 1 ? requestAnimationFrame(paso) : fin();
+            }
+            requestAnimationFrame(paso);
+        });
+    }
+
+    // Confeti pixelado con los colores de todos los jugadores
+    let confetiActivo = false;
+    function confeti(colores) {
+        const c = $('confeti');
+        const ctx = c.getContext('2d');
+        c.width = Math.ceil(innerWidth / 3); c.height = Math.ceil(innerHeight / 3); // baja resolución = pixel art
+        const piezas = Array.from({ length: 90 }, () => ({
+            x: Math.random() * c.width, y: -Math.random() * c.height,
+            v: .4 + Math.random() * 1.1, d: Math.random() * 6.28,
+            tam: 1 + Math.floor(Math.random() * 3),
+            color: colores[Math.floor(Math.random() * colores.length)],
+        }));
+        confetiActivo = true;
+        (function dibujar() {
+            if (!confetiActivo) return ctx.clearRect(0, 0, c.width, c.height);
+            ctx.clearRect(0, 0, c.width, c.height);
+            piezas.forEach(p => {
+                p.y += p.v; p.d += .05; p.x += Math.sin(p.d) * .4;
+                if (p.y > c.height) { p.y = -4; p.x = Math.random() * c.width; }
+                ctx.fillStyle = p.color;
+                ctx.fillRect(Math.round(p.x), Math.round(p.y), p.tam, Math.sin(p.d) > 0 ? p.tam : 1); // "gira"
+            });
+            requestAnimationFrame(dibujar);
+        })();
+    }
+
+    async function mostrarVictoria(e) {
+        const ranking = e.ranking;
+        const yoIdx = ranking.findIndex(j => j.id === miId);
+        const yo = ranking[yoIdx] ?? { danio: 0 };
+        const total = ranking.reduce((suma, j) => suma + j.danio, 0) || 1;
+        const puesto = yoIdx + 1;
+
+        // Reseteamos todo (por si es la segunda victoria de la noche)
+        ['v-puesto', 'v-danio', 'v-aporte', 'v-acciones'].forEach(id => $(id).classList.remove('ver'));
+        $('v-golpe-final').classList.remove('ver');
+        $('v-esperando').classList.remove('ver');
+        $('v-esperar').style.display = '';
+        $('v-tabla').innerHTML = '';
+        armarTitulo();
+
+        const pantalla = $('victoria');
+        pantalla.classList.add('visible');
+        pantalla.scrollTop = 0;
+        confeti([...new Set(ranking.map(j => j.color)), '#ffc53d', '#5ff3ff']);
+
+        await esperar(1600); // que se luzca el título
+
+        // 1) Tu daño, contando
+        $('v-danio').classList.add('ver');
+        await contar($('v-danio').querySelector('.valor'), yo.danio, 1500);
+        await esperar(200);
+
+        // 2) Qué porcentaje del daño total hiciste vos
+        $('v-aporte').classList.add('ver');
+        await contar($('v-aporte').querySelector('.valor'), Math.round(yo.danio * 100 / total), 900, '%');
+        await esperar(350);
+
+        // 3) El puesto, que "golpea" la pantalla
+        const caja = $('v-puesto');
+        caja.className = 'puesto marco ' + (puesto >= 1 && puesto <= 3 ? 'p' + puesto : 'otro');
+        caja.querySelector('.num').textContent = puesto ? '#' + puesto : '-';
+        caja.querySelector('small').textContent =
+            puesto === 1 ? '¡MVP! el que más le pegó' : `de ${ranking.length} ${ranking.length === 1 ? 'jugador' : 'jugadores'}`;
+        void caja.offsetWidth; // reinicia la animación
+        caja.classList.add('ver');
+        window.Sonido?.sonido(puesto === 1 ? 'perfecto' : 'impacto');
+        window.Campo?.hitstop(120, 4);
+        navigator.vibrate?.(puesto === 1 ? [80, 40, 80, 40, 250] : [120]);
+        if (e.golpeFinal === miNombre) {
+            await esperar(300);
+            $('v-golpe-final').classList.add('ver');
+            window.Sonido?.sonido('combo');
+        }
+        await esperar(500);
+
+        // 4) La tabla, fila por fila (nombres con textContent: nada de HTML ajeno)
+        for (const [i, j] of ranking.slice(0, 5).entries()) {
+            const li = document.createElement('li');
+            if (j.id === miId) li.classList.add('yo');
+            const pos = document.createElement('span'); pos.className = 'pos'; pos.textContent = (i + 1) + '.';
+            const punto = document.createElement('span'); punto.className = 'punto'; punto.style.background = j.color;
+            const nom = document.createElement('span'); nom.className = 'nom'; nom.textContent = j.nombre;
+            const dan = document.createElement('span'); dan.textContent = j.danio;
+            li.append(pos, punto, nom, dan);
+            $('v-tabla').appendChild(li);
+            void li.offsetWidth;
+            li.classList.add('ver');
+            window.Sonido?.sonido('tick');
+            await esperar(180);
+        }
+
+        // 5) Los botones
+        $('v-acciones').classList.add('ver');
+    }
+
+    function ocultarVictoria() {
+        $('victoria').classList.remove('visible');
+        confetiActivo = false;
+    }
+
+    $('v-esperar').addEventListener('click', () => {
+        $('v-esperar').style.display = 'none';
+        $('v-esperando').classList.add('ver');
+        mensaje('> esperando otra partida...');
+    });
+
     window.Echo.channel('jefe')
         .listen('.JugadorUnido', (e) => {
             actualizarVida(e.vida, e.vidaMax);
@@ -646,15 +891,16 @@ document.addEventListener('DOMContentLoaded', () => {
             descongelar();
             window.Campo?.jefeMuere();
             window.Sonido?.sonido('victoria');
-            grito('¡VICTORIA!', 'perfecto');
             cortarCombo();
-            const puesto = e.ranking.findIndex(j => j.nombre === miNombre) + 1;
+            const puesto = e.ranking.findIndex(j => j.id === miId) + 1;
             mensaje(`> proceso eliminado. quedaste #${puesto}`);
+            mostrarVictoria(e);
         })
         .listen('.JefeReiniciado', (e) => {
             actualizarVida(e.vida, e.vidaMax);
             jefeMuerto = false;
             descongelar();
+            ocultarVictoria(); // ¡otra ronda!
             window.Campo?.jefeRevive();
             window.Campo?.setFase(1);
             ponerFase(1);

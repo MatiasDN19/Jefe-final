@@ -183,6 +183,7 @@ class Juego
             ->sortByDesc('danio')
             ->values()
             ->map(fn ($j) => [
+                'id' => $j['id'],
                 'nombre' => $j['nombre'],
                 'color' => $j['color'],
                 'campeon' => $j['campeon'],
