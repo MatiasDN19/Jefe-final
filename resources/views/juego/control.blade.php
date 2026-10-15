@@ -246,11 +246,27 @@ document.addEventListener('DOMContentLoaded', () => {
         carril = nuevo;
         window.Campo?.setCarril(carril);
         window.Sonido?.sonido('mover');
-        enviar('{{ route('mover') }}', { carril });
+        avisarMovimiento();
     }
 
-    // ATACAR: el crítico depende de la barra de timing
-    async function atacar() {
+    // Un solo "me moví" viajando a la vez. Si te movés de nuevo mientras
+    // tanto, cuando vuelve la respuesta mandamos tu carril ACTUAL (el último
+    // gana). Así nunca se acumula una fila de movimientos viejos.
+    let moviendo = false;
+    let movimientoPendiente = false;
+    async function avisarMovimiento() {
+        if (moviendo) { movimientoPendiente = true; return; }
+        moviendo = true;
+        do {
+            movimientoPendiente = false;
+            await enviar('{{ route('mover') }}', { carril });
+        } while (movimientoPendiente);
+        moviendo = false;
+    }
+
+    // ATACAR: el golpe se ve y se escucha YA; el aviso al servidor se junta
+    // en una ráfaga (ver despacharGolpes)
+    function atacar() {
         const t = performance.now();
         if (!puedoActuar() || t - ultimoAtaque < 160) return; // mismo freno que el servidor
         ultimoAtaque = t;
@@ -274,12 +290,37 @@ document.addEventListener('DOMContentLoaded', () => {
             window.Sonido?.sonido('golpe');
         }
 
-        const data = await enviar('{{ route('atacar') }}', { critico });
+        golpesPendientes.push(critico);
+        despacharGolpes();
+    }
+
+    // RÁFAGAS: como mucho UN pedido de ataque viajando a la vez.
+    // Los golpes que das mientras tanto se juntan y salen todos en el
+    // próximo pedido. Spameando a full son ~3-4 pedidos por segundo en vez
+    // de 6+, y el servidor no se atora (tus movimientos pasan rápido).
+    let golpesPendientes = [];
+    let atacando = false;
+    let ultimoEnvio = 0;
+    async function despacharGolpes() {
+        if (atacando || !golpesPendientes.length) return;
+        atacando = true;
+        // Respetamos el freno del servidor: no mandamos dos ráfagas a menos de 170 ms
+        const espera = 170 - (performance.now() - ultimoEnvio);
+        if (espera > 0) await new Promise(r => setTimeout(r, espera));
+        ultimoEnvio = performance.now();
+        const golpes = golpesPendientes.splice(0); // nos llevamos todos
+        const data = await enviar('{{ route('atacar') }}', { golpes });
         if (data.ok) {
             $('mi-danio').textContent = data.miDanio;
-            numero(data.critico ? `CRIT -${data.danio}` : `-${data.danio}`, data.critico ? '#ffc53d' : miColor, data.critico);
-            sumarCombo();
+            // Un número por cada golpe que contó, apenas escalonados
+            data.danios.forEach((d, i) => setTimeout(() => {
+                const crit = data.criticos[i];
+                numero(crit ? `CRIT -${d}` : `-${d}`, crit ? '#ffc53d' : miColor, crit);
+                sumarCombo();
+            }, i * 70));
         }
+        atacando = false;
+        despacharGolpes(); // ¿se juntaron más mientras esperábamos? van ahora
     }
 
     // =================================================================

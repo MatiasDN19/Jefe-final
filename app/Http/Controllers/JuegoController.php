@@ -134,8 +134,13 @@ class JuegoController extends Controller
     /** POST /atacar */
     public function atacar(Request $request)
     {
-        $critico = $request->boolean('critico');
-        $r = Juego::atacar($this->miId(), $critico);
+        // Llega una ráfaga: una lista de golpes, cada uno dice si fue crítico
+        $data = $request->validate([
+            'golpes' => ['required', 'array', 'min:1', 'max:20'],
+            'golpes.*' => ['boolean'],
+        ]);
+        $golpes = array_map(fn ($g) => (bool) $g, $data['golpes']);
+        $r = Juego::atacar($this->miId(), $golpes);
 
         if (! $r['ok']) {
             return response()->json($r, 409); // 409 = "ahora no se puede"
@@ -152,11 +157,17 @@ class JuegoController extends Controller
             vida: $r['vida'],
             vidaMax: Juego::vidaMax(),
             ranking: Juego::ranking(5),
+            golpes: count($r['danios']),
         ));
 
         $this->chequearVictoria($r, $j['nombre']);
 
-        return response()->json(['ok' => true, 'danio' => $r['danio'], 'critico' => $r['critico'], 'miDanio' => $j['danio']]);
+        return response()->json([
+            'ok' => true,
+            'danios' => $r['danios'],     // un número por golpe que contó
+            'criticos' => $r['criticos'],
+            'miDanio' => $j['danio'],
+        ]);
     }
 
     /** POST /mover — cambiar de carril */

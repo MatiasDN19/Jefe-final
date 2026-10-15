@@ -285,7 +285,8 @@ document.addEventListener('DOMContentLoaded', () => {
             pintarRanking(e.ranking);
             window.CampoPantalla?.atacar(e.jugadorId, e.critico, e.color);
             window.Jefe3D?.golpe({ color: e.color, critico: e.critico });
-            mostrarNumero(e.critico ? `${e.nombre} CRIT -${e.danio}` : `-${e.danio}`, e.color, e.critico);
+            const veces = e.golpes > 1 ? `x${e.golpes} ` : '';
+            mostrarNumero(e.critico ? `${e.nombre} CRIT ${veces}-${e.danio}` : `${veces}-${e.danio}`, e.color, e.critico);
             if (e.critico) destello(e.color);
         })
         .listen('.EscudoActivado', (e) => {

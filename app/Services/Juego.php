@@ -28,6 +28,7 @@ class Juego
     public const DANIO_ESPECIAL = 60;          // especial lanzado solo
     public const DANIO_COMBO_POR_JUGADOR = 150; // combo de equipo
     public const MIN_ENTRE_ATAQUES = 0.15;     // segundos (anti autoclicker)
+    public const MAX_GOLPES_RAFAGA = 8;        // golpes como máximo por pedido
 
     // Ataque combinado
     public const COMBO_JUGADORES = 3;
@@ -279,27 +280,44 @@ class Juego
      * Ataque normal. $critico lo decide la barra de timing del navegador
      * (le creemos, pero el daño y el ritmo los controla el servidor).
      */
-    public static function atacar(string $id, bool $critico): array
+    /**
+     * Atacar con una RÁFAGA de golpes: el celu junta los golpes que diste
+     * mientras esperaba la respuesta anterior y los manda todos juntos.
+     * $golpes = [false, true, false]  →  3 golpes, el segundo fue crítico.
+     */
+    public static function atacar(string $id, array $golpes): array
     {
-        return self::conLock(function () use ($id, $critico) {
+        return self::conLock(function () use ($id, $golpes) {
             $jugadores = self::jugadores();
 
             if ($error = self::puedeActuar($jugadores, $id)) {
                 return $error;
             }
 
-            // Anti autoclicker: un mínimo de tiempo entre golpes
+            // Anti autoclicker: cuántos golpes "entran" en el tiempo que pasó
+            // desde la ráfaga anterior (uno cada MIN_ENTRE_ATAQUES segundos).
+            // Si alguien manda 50 golpes de una, solo cuentan los que entran.
             $ahora = microtime(true);
-            if ($ahora - $jugadores[$id]['ultimo_golpe'] < self::MIN_ENTRE_ATAQUES) {
+            $pasaron = $ahora - $jugadores[$id]['ultimo_golpe'];
+            // (redondeamos para tolerar que la red atrase o adelante un poco los pedidos)
+            $permitidos = (int) min(self::MAX_GOLPES_RAFAGA, round($pasaron / self::MIN_ENTRE_ATAQUES));
+            if ($permitidos < 1) {
                 return ['ok' => false, 'motivo' => 'muy_rapido'];
             }
+            $golpes = array_slice($golpes, 0, $permitidos);
             $jugadores[$id]['ultimo_golpe'] = $ahora;
 
-            $danio = $critico
-                ? self::campeon($jugadores[$id])['danio_critico']
-                : random_int(self::DANIO_MIN, self::DANIO_MAX);
+            $stats = self::campeon($jugadores[$id]);
+            $danios = array_map(
+                fn ($critico) => $critico ? $stats['danio_critico'] : random_int(self::DANIO_MIN, self::DANIO_MAX),
+                $golpes
+            );
 
-            return self::aplicarDanio($jugadores, $id, $danio) + ['critico' => $critico];
+            return self::aplicarDanio($jugadores, $id, array_sum($danios)) + [
+                'critico' => in_array(true, $golpes, true),
+                'danios' => $danios,
+                'criticos' => $golpes,
+            ];
         });
     }
 
