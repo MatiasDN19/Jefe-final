@@ -3,7 +3,7 @@
 @section('titulo', 'Kernel Corrupto')
 
 @section('vite')
-    @vite(['resources/js/pantalla.js', 'resources/js/campo-pantalla.js'])
+    @vite(['resources/js/pantalla.js', 'resources/js/campo-pantalla.js', 'resources/js/victoria-pantalla.js'])
 @endsection
 
 @section('estilos')
@@ -64,23 +64,71 @@
     .flash.activo { animation: flash .25s steps(3); }
     @keyframes flash { 0% { opacity: .5; } 100% { opacity: 0; } }
 
-    /* Victoria */
+    /* =========== VICTORIA (la secuencia está en resources/js/victoria-pantalla.js) =========== */
     .victoria {
-        position: fixed; inset: 0; z-index: 60; display: none;
-        flex-direction: column; align-items: center; justify-content: center; gap: 26px;
-        background: rgba(5, 5, 12, .88); text-align: center;
+        position: fixed; inset: 0; z-index: 60; display: none; overflow: hidden;
+        flex-direction: column; align-items: center; justify-content: flex-start; gap: 18px; padding-top: 3vh;
+        background: radial-gradient(ellipse at 50% 30%, rgba(214,64,159,.35), rgba(5,5,12,.95) 60%); text-align: center;
     }
-    .victoria.visible { display: flex; animation: glitch .4s steps(3) 1; }
-    .victoria h1 { margin: 0; font-size: 44px; line-height: 1.4; color: var(--cian); text-shadow: 5px 5px 0 var(--carmesi); }
-    .victoria .sub { font-family: var(--pixel); font-size: 18px; color: var(--texto); }
-    #golpe-final { font-size: 28px; color: var(--luz); }
-    .podio { display: flex; align-items: flex-end; gap: 16px; }
-    .podio .escalon { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 200px; }
-    .podio .bloque { width: 100%; display: flex; align-items: flex-start; justify-content: center; padding-top: 12px;
-        font-family: var(--pixel); font-size: 28px; color: var(--vacio);
-        box-shadow: inset -6px -6px 0 rgba(0,0,0,.3), inset 6px 6px 0 rgba(255,255,255,.3); }
-    .podio .nombre { font-size: 28px; }
-    .podio .danio { font-size: 20px; color: var(--luz); }
+    .victoria.visible { display: flex; animation: flashVictoria .7s steps(5); }
+    @keyframes flashVictoria { 0% { background: #fff; } 100% { } }
+    .victoria.sacudida { animation: sacudidaV .5s steps(8); }
+    @keyframes sacudidaV {
+        0%, 100% { transform: none; } 25% { transform: translate(-12px, 8px); }
+        50% { transform: translate(10px, -8px); } 75% { transform: translate(-6px, 4px); }
+    }
+    #v-fuegos { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; image-rendering: pixelated; }
+
+    /* Título 3D: sombras apiladas = extrusión; la línea se balancea en perspectiva */
+    #v-titulo { perspective: 700px; position: relative; }
+    #v-titulo .linea { display: block; font-family: var(--pixel); line-height: 1.2; color: #fff; white-space: nowrap;
+        transform-style: preserve-3d; animation: balanceoV 3.4s ease-in-out infinite; }
+    #v-titulo .chica { font-size: clamp(22px, 3vw, 44px); color: var(--cian); }
+    #v-titulo .grande { font-size: clamp(40px, 6.5vw, 104px); }
+    #v-titulo .letra { display: inline-block; opacity: 0;
+        text-shadow: 2px 2px 0 #c01d52, 4px 4px 0 #c01d52, 6px 6px 0 #a3174a, 8px 8px 0 #a3174a,
+            10px 10px 0 #7a1240, 12px 12px 0 #7a1240, 14px 14px 0 #4c0d33, 16px 16px 0 #4c0d33,
+            20px 24px 26px rgba(0,0,0,.6), 0 0 40px rgba(255,197,61,.45); }
+    .victoria.visible #v-titulo .letra { animation: caeLetraV .6s steps(6) forwards, olaV 1.8s ease-in-out infinite;
+        animation-delay: calc(var(--i) * 80ms), calc(.8s + var(--i) * 100ms); }
+    @keyframes caeLetraV { 0% { opacity: 0; transform: translateY(-260px) scale(2.6) rotate(-25deg); }
+        70% { opacity: 1; transform: translateY(10px) scale(.9); } 100% { opacity: 1; transform: none; } }
+    @keyframes olaV { 0%, 100% { translate: 0 0; } 50% { translate: 0 -10px; } }
+    @keyframes balanceoV { 0%, 100% { transform: rotateX(16deg) rotateY(-10deg); } 50% { transform: rotateX(8deg) rotateY(10deg); } }
+
+    #v-sub { font-family: var(--pixel); font-size: clamp(14px, 1.6vw, 24px); color: #ffc53d; opacity: 0; text-shadow: 3px 3px 0 var(--vacio); }
+    #v-sub.ver { opacity: 1; animation: parpadeoTexto .3s steps(2) 3; }
+
+    .v-stats { display: flex; gap: 16px; opacity: 0; position: relative; }
+    .v-stats.ver { opacity: 1; animation: entraV .4s steps(4); }
+    @keyframes entraV { 0% { transform: translateY(30px); opacity: 0; } 100% { transform: none; opacity: 1; } }
+    .v-stats .marco { padding: 10px 20px; min-width: 200px; }
+    .v-stats small { display: block; font-size: 20px; color: var(--luz); }
+    .v-stats b { font-family: var(--pixel); font-size: 26px; color: #fff; font-weight: normal; }
+
+    /* Podio: los escalones crecen desde el piso y el campeón cae arriba */
+    .podio { display: flex; align-items: flex-end; gap: 22px; margin-top: auto; position: relative; }
+    .podio .escalon { display: flex; flex-direction: column; align-items: center; width: 240px; }
+    .podio .campeon-podio { image-rendering: pixelated; opacity: 0; margin-bottom: -8px; }
+    .podio .p1 .campeon-podio { width: 234px; } .podio .p2 .campeon-podio, .podio .p3 .campeon-podio { width: 182px; }
+    .podio .nombre { font-family: var(--pixel); font-size: 18px; opacity: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 3px 3px 0 var(--vacio); }
+    .podio .p1 .nombre { font-size: 24px; }
+    .podio .danio { font-size: 22px; color: var(--luz); opacity: 0; margin: 4px 0 8px; }
+    .podio .bloque { width: 100%; height: 0; display: flex; justify-content: center; align-items: flex-start; padding-top: 0; overflow: hidden;
+        font-family: var(--pixel); font-size: 44px; color: var(--vacio); background: var(--color);
+        box-shadow: inset -8px -8px 0 rgba(0,0,0,.3), inset 8px 8px 0 rgba(255,255,255,.35); }
+    .podio .sube .bloque { animation: subeBloque .5s steps(6) forwards; }
+    .podio .sube .campeon-podio { animation: caeCampeon .5s steps(5) .35s forwards; }
+    .podio .sube .nombre, .podio .sube .danio { animation: entraV .3s steps(3) .6s forwards; }
+    @keyframes subeBloque { to { height: var(--alto); padding-top: 14px; } }
+    @keyframes caeCampeon { 0% { opacity: 0; transform: translateY(-300px); } 80% { opacity: 1; transform: translateY(8px); } 100% { opacity: 1; transform: none; } }
+
+    .v-resto { list-style: none; margin: 0 0 7vh; padding: 0; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 24px;
+        max-width: 80vw; font-size: 22px; color: var(--luz); opacity: 0; position: relative; }
+    .v-resto.ver { opacity: 1; animation: entraV .4s steps(4); }
+    .v-resto b { font-family: var(--pixel); font-size: 12px; font-weight: normal; margin-right: 6px; }
+    .v-resto i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; }
+    .v-resto li { white-space: nowrap; }
 
     .admin { position: fixed; right: 16px; bottom: 16px; z-index: 70; display: flex; gap: 8px; opacity: .45; }
     .admin:hover { opacity: 1; }
@@ -144,10 +192,16 @@
     <div class="flash" id="flash"></div>
 
     <div class="victoria" id="victoria">
-        <h1>PROCESO<br>ELIMINADO</h1>
-        <div class="sub">¡Muy bien equipo!</div>
-        <div id="golpe-final"></div>
-        <div class="podio" id="podio"></div>
+        <canvas id="v-fuegos"></canvas>
+        <div id="v-titulo"></div>
+        <div id="v-sub">¡MUY BIEN EQUIPO!</div>
+        <div class="v-stats" id="v-stats">
+            <div class="marco"><small>DAÑO TOTAL</small><b id="v-total">0</b></div>
+            <div class="marco"><small>JUGADORES</small><b id="v-jugadores">0</b></div>
+            <div class="marco"><small>GOLPE FINAL</small><b id="v-golpe"></b></div>
+        </div>
+        <div class="podio" id="v-podio"></div>
+        <ol class="v-resto" id="v-resto"></ol>
     </div>
 
     {{-- Botones para quien presenta --}}
@@ -229,31 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
         n.style.top  = (12 + Math.random() * 35) + '%';
         arena.appendChild(n);
         setTimeout(() => n.remove(), 900);
-    }
-
-    function mostrarVictoria(e) {
-        $('golpe-final').textContent = `golpe final: ${e.golpeFinal}`;
-        const alturas = [180, 130, 90];
-        const orden = [1, 0, 2].filter(i => e.ranking[i]); // podio: 2º - 1º - 3º
-        $('podio').replaceChildren(...orden.map(i => {
-            const j = e.ranking[i];
-            const escalon = document.createElement('div');
-            escalon.className = 'escalon';
-            const nombre = document.createElement('div');
-            nombre.className = 'nombre';
-            nombre.textContent = j.nombre;
-            const danio = document.createElement('div');
-            danio.className = 'danio';
-            danio.textContent = `${j.danio} de daño`;
-            const bloque = document.createElement('div');
-            bloque.className = 'bloque';
-            bloque.style.height = alturas[i] + 'px';
-            bloque.style.background = j.color;
-            bloque.textContent = i + 1;
-            escalon.append(nombre, danio, bloque);
-            return escalon;
-        }));
-        $('victoria').classList.add('visible');
     }
 
     const CARRIL_TXT = ['A LA IZQUIERDA', 'AL CENTRO', 'A LA DERECHA'];
@@ -352,7 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
             agregarAlFeed(`${e.jugador.nombre} cambió su perfil`, e.jugador.color);
         })
         .listen('.NuevaPartida', (e) => {
-            $('victoria').classList.remove('visible');
+            window.VictoriaPantalla?.ocultar();
             window.CampoPantalla?.limpiar();
             window.Jefe3D?.revivir();
             window.Jefe3D?.setFase(1, false);
@@ -367,10 +396,10 @@ document.addEventListener('DOMContentLoaded', () => {
             window.Jefe3D?.morir();
             destello('#ffffff');
             agregarAlFeed(`proceso eliminado por ${e.golpeFinal}`, '#5ff3ff');
-            setTimeout(() => mostrarVictoria(e), 1500); // primero que se vea la explosión
+            setTimeout(() => window.VictoriaPantalla?.mostrar(e), 1500); // primero que se vea la explosión
         })
         .listen('.JefeReiniciado', (e) => {
-            $('victoria').classList.remove('visible');
+            window.VictoriaPantalla?.ocultar();
             window.Jefe3D?.revivir();
             window.Jefe3D?.setFase(1, false);
             ponerFase(1);

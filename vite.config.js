@@ -14,6 +14,7 @@ export default defineConfig({
                 'resources/js/unirse.js',   // vista previa de los campeones
                 'resources/js/portada.js',  // portada con el menú
                 'resources/js/campo-pantalla.js', // campeones en la pantalla grande
+                'resources/js/victoria-pantalla.js', // podio final de la pantalla grande
             ],
             refresh: true,
             fonts: [
